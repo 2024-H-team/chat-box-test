@@ -23,7 +23,7 @@ async function getResponseFromOpenAI(userMessage, history = []) {
 		});
 
 		const responseMessage = completion.choices[0]?.message?.content;
-		console.log(completion);
+		console.log(responseMessage);
 		if (!responseMessage) {
 			throw new Error("No response from OpenAI.");
 		}

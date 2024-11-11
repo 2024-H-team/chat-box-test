@@ -1,4 +1,5 @@
-import React, { useState, ChangeEvent, MouseEvent, useEffect } from 'react';
+import React, { useState, useEffect, useRef, MouseEvent } from 'react';
+import ReactMarkdown from 'react-markdown';
 import '@/Styles/ChatBox.scss';
 
 interface Message {
@@ -10,6 +11,7 @@ const ChatBox: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
+    const inputRef = useRef<HTMLDivElement>(null);
 
     const MAX_MESSAGES = 10;
 
@@ -33,11 +35,9 @@ const ChatBox: React.FC = () => {
 
         setMessages((prevMessages) => {
             const updatedMessages: Message[] = [...prevMessages, { role: 'user', message: input }];
-
             if (updatedMessages.length > MAX_MESSAGES) {
                 updatedMessages.shift();
             }
-
             return updatedMessages;
         });
 
@@ -66,6 +66,9 @@ const ChatBox: React.FC = () => {
             });
 
             setInput('');
+            if (inputRef.current) {
+                inputRef.current.textContent = '';
+            }
         } catch (error) {
             console.error('Error:', error);
             setMessages((prevMessages) => [
@@ -77,8 +80,9 @@ const ChatBox: React.FC = () => {
         }
     };
 
-    const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-        setInput(event.target.value);
+    const handleInputChange = (event: React.FormEvent<HTMLDivElement>) => {
+        const text = event.currentTarget.textContent || '';
+        setInput(text);
     };
 
     return (
@@ -90,12 +94,18 @@ const ChatBox: React.FC = () => {
                             key={index}
                             className={`message ${msg.role === 'user' ? 'user-message' : 'assistant-message'}`}
                         >
-                            {msg.message}
+                            <ReactMarkdown>{msg.message}</ReactMarkdown> {/* Render Markdown */}
                         </div>
                     ))}
                 </div>
                 <div className="input-box">
-                    <textarea value={input} onChange={handleInputChange} placeholder="メッセージを入力..." />
+                    <div
+                        contentEditable
+                        className="input-div"
+                        onInput={handleInputChange}
+                        ref={inputRef}
+                        suppressContentEditableWarning={true}
+                    />
                     <button onClick={handleSendMessage} disabled={loading}>
                         {loading ? '送信中...' : '送信'}
                     </button>
