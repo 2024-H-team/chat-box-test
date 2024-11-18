@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, MouseEvent } from 'react';
+import React, { useState, useEffect, useRef, MouseEvent, KeyboardEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
 import '@/Styles/ChatBox.scss';
 
@@ -28,8 +28,8 @@ const ChatBox: React.FC = () => {
         }
     }, [messages]);
 
-    const handleSendMessage = async (event: MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
+    const handleSendMessage = async (event?: MouseEvent<HTMLButtonElement> | KeyboardEvent<HTMLDivElement>) => {
+        if (event) event.preventDefault();
 
         if (!input) return;
 
@@ -85,6 +85,13 @@ const ChatBox: React.FC = () => {
         setInput(text);
     };
 
+    const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            handleSendMessage();
+        }
+    };
+
     return (
         <div className="chatbox-container">
             <div className="chatbox">
@@ -103,6 +110,7 @@ const ChatBox: React.FC = () => {
                         contentEditable
                         className="input-div"
                         onInput={handleInputChange}
+                        onKeyDown={handleKeyDown}
                         ref={inputRef}
                         suppressContentEditableWarning={true}
                     />
